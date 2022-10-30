@@ -566,15 +566,18 @@ int main(int argc, char **argv)
                                                         all_client[m].messages_received += 1;
                                                     }
                                                 }
-                                                cse4589_print_and_log("[RELAYED:END]");
+                                                  cse4589_print_and_log("[RELAYED:END]");
 //                                                cout << "send to to_client success!" << endl;
                                             } else {
 //                                                cout << "send to to_client failed: " << send_res << endl;
-                                                cse4589_print_and_log("[RELAYED:FAILED");
+                                                  cse4589_print_and_log("[RELAYED:FAILED");
+                                                  cse4589_print_and_log("[RELAYED:END]");
 
                                             }
                                         }
+
                                     }
+
                                 }
 
                             }else if(flag == Broadcast_Bit){
@@ -629,21 +632,24 @@ int main(int argc, char **argv)
                                                     all_client[m].messages_received+= 1;
                                                 }
                                             }
-                                            cse4589_print_and_log("[RELAYED:SUCCESS]\n");
-                                            cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n", from_client_ip,"255.255.255.255",msg);
-                                            cse4589_print_and_log("[RELAYED:END]\n");
+
 
 //                                            printf("msg from:%s, to:%s\n[msg]:%s\n", from_client_ip,it->first.c_str(),msg);
 //                                            cout<<"broadcast to clientIP " << it->first<<" success!"<<endl;
                                         }else{
 //                                            cout<<"broadcast to clientIP " << it->first<<" failed!"<<endl;
                                             cse4589_print_and_log("[RELAYED:FAILED]");
+                                            cse4589_print_and_log("[RELAYED:END]");
 
                                         }
                                     }
                                 }
+                                cse4589_print_and_log("[RELAYED:SUCCESS]\n");
+                                cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n", from_client_ip,"255.255.255.255",msg);
+                                cse4589_print_and_log("[RELAYED:END]\n");
 
                             }else if(flag== Block_Bit){
+                                cout<<"execute block command"<<endl;
                                 char* client = (char*)malloc(32);
                                 memset(client,0,32);
                                 char* blocked_client = (char*)malloc(32);
@@ -664,7 +670,9 @@ int main(int argc, char **argv)
                                             if(all_client[i].ip_addr == blocked_client){
                                                 it->second.push_back(all_client[i]);
                                                 sort(it->second.begin(),it->second.end(), Compare);
-                                                cout<<"block success!"<<endl;
+//                                                cout<<"block success!"<<endl;
+                                                cse4589_print_and_log("[BLOCK:SUCCESS]");
+                                                cse4589_print_and_log("[BLOCK:END]");
                                                 break;
                                             }
                                         }
@@ -705,6 +713,7 @@ int main(int argc, char **argv)
                         }
                     }
                 }
+
             }
 
             printf("\n[PA1-Server@CSE489/589]$ ");
@@ -842,7 +851,7 @@ int main(int argc, char **argv)
 
                         if(input == _PORT){
                             cse4589_print_and_log("[PORT:SUCCESS]\n");
-                            cse4589_print_and_log("PORT:%d\n", ntohs(my_addr.sin_port));
+                            cse4589_print_and_log("PORT:%d\n", htons(my_addr.sin_port));
                             cse4589_print_and_log("[PORT:END]\n");
 
                         }else if(input == _IP){
@@ -887,12 +896,13 @@ int main(int argc, char **argv)
                             inet_aton(_ipaddr, &(server_ip_addr));
 
                             int server_pID = atoi(&input_portID[0]);
-
+                            cout<<"server_pID: "<<server_pID<<endl;
                             sockaddr_in server_sock;
                             memset(&server_sock,0, len);
                             server_sock.sin_family = AF_INET;
                             server_sock.sin_port = htons(server_pID);
                             server_sock.sin_addr = server_ip_addr;
+                            cout<< "server_sock: "<< server_sock.sin_port<<endl;
 
                             cout<<"connecting to "<<_ipaddr<<":"<<server_sock.sin_port<<endl;
 
@@ -912,15 +922,14 @@ int main(int argc, char **argv)
                                 is_login = true;
                                 SERVER_IP_ADDR = input_ip_addr;
                                 SERVER_PORT_ID = atoi(input_portID.c_str());
-
+                                cout<<"server_port_id :"<< SERVER_PORT_ID<<endl;
                                 //my_addr = new_addr;
                                 my_addr.sin_port = htons(PORT);
-
+                                cout<<"my_addr :"<< my_addr.sin_port<<endl;
                                 // send msg to server
                                 string packet_flag = "0";
                                 string packet_addr = inet_ntoa(my_addr.sin_addr);
                                 string packet_port = convertInt(ntohs(my_addr.sin_port));
-
                                 char *name = (char *) malloc(64);
                                 gethostname(name, 64);
 
@@ -1090,12 +1099,15 @@ int main(int argc, char **argv)
                                 sendBuf[index] = *blocked_client;
                             }
                             if(send(clientSocket, (void *) sendBuf, 64+1, 0) == -1){
-                                cout<<"block failed"<<endl;
+//                                cout<<"block failed"<<endl;
+//                                cse4589_print_and_log("")
+                                cse4589_print_and_log("[BLOCKED:FAILED]\n");
+                                cse4589_print_and_log("[BLOCKED:END]\n");
                             } else{
                                 cout<<"block success!"<<endl;
                                 cout<<sendBuf<<endl;
-                                cse4589_print_and_log("[BLOCK:SUCCESS]\n");
-                                cse4589_print_and_log("[BLOCK:END]\n");
+                                cse4589_print_and_log("[BLOCKED:SUCCESS]\n");
+                                cse4589_print_and_log("[BLOCKED:END]\n");
                             }
 
 
@@ -1112,6 +1124,7 @@ int main(int argc, char **argv)
                             if(send(clientSocket, (void *) sendBuf, 32+1, 0) == -1){
                                 cout<<"logout failed"<<endl;
                             } else{
+
                                 cout<<"logout success!"<<endl;
                                 cout<<sendBuf<<endl;
                                 cse4589_print_and_log("[LOGOUT:SUCCESS]\n");
@@ -1120,7 +1133,7 @@ int main(int argc, char **argv)
 
 
                         }else{
-                            cse4589_print_and_log("Client receive an invalid request.\n");
+                            printf("Client receive an invalid request.\n");
                         }
 
 
